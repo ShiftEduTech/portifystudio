@@ -6,7 +6,7 @@ import { ExternalLink, Download, Rocket, X, Lock } from 'lucide-react';
 
 const Github = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-4.51-2-7-2"/>
+    <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" /><path d="M9 18c-4.51 2-4.51-2-7-2" />
   </svg>
 );
 import { Template } from '@/data/templates';
@@ -49,9 +49,9 @@ export default function TemplateActions({ template }: TemplateActionsProps) {
     if (actionType === 'download') {
       try {
         await trackTemplateDownload(
-          user.uid, 
-          template.id, 
-          template.title, 
+          user.uid,
+          template.id,
+          template.title,
           template.thumbnails?.[0] || template.images?.[0] || ''
         );
       } catch {
@@ -73,34 +73,46 @@ export default function TemplateActions({ template }: TemplateActionsProps) {
     <>
       <div className="flex flex-col gap-4 w-full mt-8">
         {/* Live Preview */}
-        <a
+        <motion.a
+          whileHover={{ scale: 1.02, y: -2 }}
+          whileTap={{ scale: 0.98 }}
           href={template.liveLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold py-4 px-8 rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.4)] hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] transition-all duration-300 transform hover:-translate-y-1"
+          className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-indigo-500 via-blue-600 to-indigo-500 bg-[length:200%_auto] animate-gradient text-white font-bold py-4 px-8 rounded-2xl shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.5)] transition-all duration-300"
         >
           <ExternalLink className="w-5 h-5" />
           Live Preview
-        </a>
+        </motion.a>
 
         {/* Git Repository Access */}
-        <button
+        <motion.button
+          whileHover={{ scale: 1.02, y: -2 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => handleAction('git')}
-          className="w-full flex items-center justify-center gap-2 bg-black hover:bg-zinc-900 border border-white/10 text-gray-300 font-semibold py-4 px-8 rounded-xl transition-colors duration-200"
+          className="w-full flex items-center justify-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold py-4 px-8 rounded-2xl backdrop-blur-md transition-all duration-300 group"
         >
-          {isFreeTemplate || isPremiumUser ? <Github className="w-5 h-5" /> : <Lock className="w-5 h-5 text-yellow-500" />}
-          Git Repository Access
-          {(!isFreeTemplate && !isPremiumUser) && <span className="ml-2 px-2 py-0.5 text-[10px] bg-yellow-500/20 text-yellow-500 rounded font-bold uppercase">Pro</span>}
-        </button>
+          {isFreeTemplate || isPremiumUser ? (
+             <Github className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
+          ) : (
+             <Lock className="w-5 h-5 text-amber-500" />
+          )}
+          <span className="text-gray-300 group-hover:text-white transition-colors">Git Repository Access</span>
+          {(!isFreeTemplate && !isPremiumUser) && (
+            <span className="ml-1 px-2 py-0.5 text-[8px] bg-amber-500/20 text-amber-500 rounded-full border border-amber-500/30 font-black uppercase tracking-widest">Pro</span>
+          )}
+        </motion.button>
 
-        {/* Free Download */}
-        <button
+        {/* Zip-File Download */}
+        <motion.button
+          whileHover={{ scale: 1.02, y: -2 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => handleAction('download')}
-          className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold py-4 px-8 rounded-xl transition-colors duration-200"
+          className="w-full flex items-center justify-center gap-3 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-400 font-bold py-4 px-8 rounded-2xl transition-all duration-300 shadow-lg shadow-emerald-500/5 group"
         >
-          <Download className="w-5 h-5 text-green-400" />
-          Free Download
-        </button>
+          <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
+          Zip-File Download
+        </motion.button>
       </div>
 
       {/* Modals */}
@@ -131,7 +143,7 @@ export default function TemplateActions({ template }: TemplateActionsProps) {
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">Upgrade to Premium</h3>
               <p className="text-gray-400 mb-6">This feature requires a premium subscription. Unlock all templates, direct Git access, and priority support.</p>
-              <button 
+              <button
                 onClick={() => alert('Redirecting to Stripe checkout...')}
                 className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-[0_0_15px_rgba(234,179,8,0.3)]"
               >

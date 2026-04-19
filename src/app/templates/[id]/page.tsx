@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { getTemplateById } from '@/data/templates';
 import TemplateGallery from '@/components/templates/TemplateGallery';
 import TemplateActions from '@/components/templates/TemplateActions';
-import { ArrowLeft, CheckCircle2, Download, Layers, Sparkles } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Layers, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 interface PageProps {
@@ -107,25 +107,20 @@ export default async function TemplateDetailsPage({ params }: PageProps) {
 
           {/* Sidebar: Stats & Actions */}
           <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-32">
-            <div className="p-8 rounded-[32px] border border-white/10 bg-white/[0.03] backdrop-blur-xl relative overflow-hidden group">
+            <div className="p-8 rounded-[32px] border border-white/10 bg-white/[0.03] backdrop-blur-xl relative overflow-hidden group shadow-2xl shadow-indigo-500/5">
               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-3xl pointer-events-none" />
               
-              <div className="flex justify-between items-center mb-8">
-                <div>
-                  <h3 className="text-xl font-bold text-white">Get Started</h3>
+              <div className="mb-8">
+                  <h3 className="text-xl font-bold text-white tracking-tight">Get Started</h3>
                   <p className="text-xs text-gray-500 mt-1">Setup your project in seconds</p>
-                </div>
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                  <Download className="w-6 h-6 text-indigo-400" />
-                </div>
               </div>
 
               <div className="space-y-4 mb-8">
-                <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5">
-                  <span className="text-sm text-gray-400">Downloads</span>
-                  <span className="text-sm font-bold text-white">{(template.downloadCount ?? 0).toLocaleString()}</span>
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/5 group/stat hover:border-indigo-500/30 transition-colors">
+                  <span className="text-sm text-gray-400">Total Downloads</span>
+                  <span className="text-sm font-bold text-white tabular-nums">{(template.downloadCount ?? 0).toLocaleString()}</span>
                 </div>
-                <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5">
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-white/[0.03] border border-white/5 group/stat hover:border-indigo-500/30 transition-colors">
                   <span className="text-sm text-gray-400">Last Updated</span>
                   <span className="text-sm font-bold text-white">
                     {template.updatedAt?.seconds

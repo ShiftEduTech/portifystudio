@@ -1,4 +1,4 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
+import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, Auth } from 'firebase/auth';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
@@ -14,31 +14,31 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase only if it hasn't been initialized
+// Safety check: Ensure required keys exist
+const isConfigValid = !!firebaseConfig.apiKey && !!firebaseConfig.projectId;
+
+if (!isConfigValid && typeof window !== 'undefined') {
+  console.error("Firebase configuration is missing! Ensure NEXT_PUBLIC_FIREBASE environment variables are set in Vercel.");
+}
+
+// Initialize Firebase 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-let auth: Auth | any;
-let db: Firestore | any;
-let storage: FirebaseStorage | any;
-let googleProvider: GoogleAuthProvider | any;
-let analytics: Analytics | any;
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+const googleProvider = new GoogleAuthProvider();
 
-try {
-  auth = getAuth(app);
-  db = getFirestore(app);
-  storage = getStorage(app);
-  googleProvider = new GoogleAuthProvider();
-  
-  // Analytics is only available in browser environments
-  if (typeof window !== "undefined") {
-    isSupported().then((supported) => {
-      if (supported) {
-        analytics = getAnalytics(app);
-      }
-    });
-  }
-} catch (error) {
-  console.warn("Firebase Auth/DB failed to initialize.", error);
+let analytics: Analytics | undefined;
+
+// Analytics is only available in browser environments
+if (typeof window !== "undefined") {
+  isSupported().then((supported) => {
+    if (supported) {
+      analytics = getAnalytics(app);
+    }
+  });
 }
 
 export { app, auth, db, storage, googleProvider, analytics };
+

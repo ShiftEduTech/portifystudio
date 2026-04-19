@@ -3,10 +3,6 @@ import TemplateCard from '@/components/TemplateCard';
 
 export const dynamic = 'force-dynamic';
 
-// This acts as a Server Component, so we don't need 'use client'
-// or useState unless we add client-side filtering. For a premier SaaS, 
-// a simple beautiful grid is great to start.
-
 export default async function TemplatesPage() {
   const templates = await getAllTemplates();
 

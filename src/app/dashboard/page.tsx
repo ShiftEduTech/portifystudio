@@ -10,7 +10,6 @@ import {
   query, 
   where, 
   getDocs, 
-  orderBy, 
   limit, 
   getCountFromServer,
   Timestamp 
@@ -48,18 +47,20 @@ export default function DashboardPage() {
         const countSnapshot = await getCountFromServer(countQuery);
         setTotalDownloads(countSnapshot.data().count);
 
-        // 2. Fetch Recent Downloads
+        // 2. Fetch Recent Downloads (Sort in memory to avoid index requirements)
         const recentQuery = query(
           downloadsRef, 
           where('userId', '==', user.uid),
-          orderBy('downloadedAt', 'desc'),
-          limit(5)
+          limit(20) // Fetch more then sort to ensure we show the latest
         );
         const recentSnapshot = await getDocs(recentQuery);
-        const records = recentSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as DownloadRecord));
+        const records = recentSnapshot.docs
+          .map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          } as DownloadRecord))
+          .sort((a, b) => b.downloadedAt.toMillis() - a.downloadedAt.toMillis())
+          .slice(0, 5); // Take only the top 5 after sorting
         
         setRecentDownloads(records);
       } catch (error) {

@@ -112,9 +112,9 @@ export default function Footer() {
         </div>
 
         {/* Brand Mark background */}
-        <div className="absolute bottom-24 left-0 w-full overflow-hidden pointer-events-none select-none opacity-[0.02]">
-          <h2 className="text-[20vw] font-black text-white leading-none whitespace-nowrap -translate-x-10">
-            PORTIFY STUDIO
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 w-full overflow-hidden pointer-events-none select-none opacity-[0.03] flex justify-center">
+          <h2 className="text-[18vw] font-black text-white leading-none whitespace-nowrap tracking-tighter">
+            PORTIFY
           </h2>
         </div>
 

@@ -218,12 +218,6 @@ export default function AdminTemplates() {
                         {t.category}
                       </span>
                     </td>
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
-                        <Download className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
-                        {(t.downloadCount ?? 0).toLocaleString()}
-                      </div>
-                    </td>
                     <td className="px-4 py-4 text-sm text-gray-500">
                       <button
                         onClick={() => handleToggleStatus(t.id, t.status)}
@@ -240,6 +234,12 @@ export default function AdminTemplates() {
                           <><CheckCircle className="w-3 h-3" /> Published</>
                         )}
                       </button>
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
+                        <Download className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
+                        {(t.downloadCount ?? 0).toLocaleString()}
+                      </div>
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-2">

@@ -99,7 +99,7 @@ export default function AdminDashboard() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">Dashboard Overview</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Welcome back, Admin. Here's what's happening.</p>
+          <p className="text-sm text-gray-500 mt-0.5">Welcome back, Admin. Here&apos;s what&apos;s happening.</p>
         </div>
         <div className="text-xs text-gray-600 bg-gray-100 dark:bg-white/[0.04] px-3 py-1.5 rounded-lg border border-gray-200 dark:border-white/[0.06]">
           {new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}

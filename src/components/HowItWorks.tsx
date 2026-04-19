@@ -130,7 +130,7 @@ export default function HowItWorks() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-500">In 3 Simple Steps</span>
           </h2>
           <p className="text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed">
-            From picking a design to going live, we've automated the hard parts. No Git, no hosting, no hassle.
+            From picking a design to going live, we&apos;ve automated the hard parts. No Git, no hosting, no hassle.
           </p>
         </div>
 

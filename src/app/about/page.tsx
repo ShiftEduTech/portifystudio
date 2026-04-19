@@ -58,7 +58,7 @@ export default function AboutPage() {
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Our Community</h3>
               <p className="text-gray-400">
-                Join thousands of developers who have launched their careers with Portify Studio. You're in good company.
+                Join thousands of developers who have launched their careers with Portify Studio. You&apos;re in good company.
               </p>
             </div>
           </div>
@@ -66,7 +66,7 @@ export default function AboutPage() {
           <div className="bg-gradient-to-br from-white/5 to-white/0 border border-white/10 rounded-2xl p-8 sm:p-12">
             <h2 className="text-3xl font-bold text-white mb-4">Built by Shift EduTech</h2>
             <p className="text-lg text-gray-300 leading-relaxed">
-              Portify Studio is an educational initiative by Shift EduTech, dedicated to helping students and professionals build their careers. We're committed to providing free tools and resources that empower everyone to succeed in the tech industry.
+              Portify Studio is an educational initiative by Shift EduTech, dedicated to helping students and professionals build their careers. We&apos;re committed to providing free tools and resources that empower everyone to succeed in the tech industry.
             </p>
           </div>
 

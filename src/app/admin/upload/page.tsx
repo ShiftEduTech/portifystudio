@@ -238,7 +238,7 @@ export default function AdminUpload() {
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{editId ? 'Template Updated!' : 'Template Published!'}</h2>
-          <p className="text-gray-500 dark:text-gray-500 mt-2 text-sm italic">"One step closer to greatness."</p>
+          <p className="text-gray-500 dark:text-gray-500 mt-2 text-sm italic">&quot;One step closer to greatness.&quot;</p>
         </div>
         <div className="flex gap-4">
           <button onClick={() => { setDone(false); if(editId) router.push('/admin/templates'); else reset(); }}

@@ -48,7 +48,12 @@ export default function TemplateActions({ template }: TemplateActionsProps) {
     // Perform action
     if (actionType === 'download') {
       try {
-        await trackTemplateDownload(user.uid, template.id);
+        await trackTemplateDownload(
+          user.uid, 
+          template.id, 
+          template.title, 
+          template.thumbnails?.[0] || template.images?.[0] || ''
+        );
       } catch {
         // Avoid blocking download when analytics write fails.
       }

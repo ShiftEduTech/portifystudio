@@ -1,17 +1,76 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { AuthGuard } from '@/components/auth/AuthGuard';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
+import { 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  orderBy, 
+  limit, 
+  getCountFromServer,
+  Timestamp 
+} from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { Download, Plus, ArrowRight, Zap, Crown, User, ExternalLink } from 'lucide-react';
+import { Download, Plus, ArrowRight, Zap, Crown, User, ExternalLink, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+
+interface DownloadRecord {
+  id: string;
+  templateId: string;
+  templateTitle: string;
+  templateImage: string;
+  downloadedAt: Timestamp;
+}
 
 export default function DashboardPage() {
   const { user, userData } = useAuth();
   const router = useRouter();
+
+  const [totalDownloads, setTotalDownloads] = useState<number>(0);
+  const [recentDownloads, setRecentDownloads] = useState<DownloadRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchDashboardData = async () => {
+      try {
+        const downloadsRef = collection(db, 'downloads');
+        
+        // 1. Fetch Total Count
+        const countQuery = query(downloadsRef, where('userId', '==', user.uid));
+        const countSnapshot = await getCountFromServer(countQuery);
+        setTotalDownloads(countSnapshot.data().count);
+
+        // 2. Fetch Recent Downloads
+        const recentQuery = query(
+          downloadsRef, 
+          where('userId', '==', user.uid),
+          orderBy('downloadedAt', 'desc'),
+          limit(5)
+        );
+        const recentSnapshot = await getDocs(recentQuery);
+        const records = recentSnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as DownloadRecord));
+        
+        setRecentDownloads(records);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -26,6 +85,23 @@ export default function DashboardPage() {
   const plan = (userData?.plan || '').toLowerCase();
   const role = (userData?.role || '').toLowerCase();
   const isPremium = plan === 'premium' || plan === 'pro' || ['admin', 'administrator', 'superadmin'].includes(role);
+
+  const formatTimeAgo = (timestamp: Timestamp) => {
+    if (!timestamp) return 'Just now';
+    const seconds = Math.floor((new Date().getTime() - timestamp.toDate().getTime()) / 1000);
+    
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + " years ago";
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + " months ago";
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + " days ago";
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + " hours ago";
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + " minutes ago";
+    return Math.floor(seconds) + " seconds ago";
+  };
 
   return (
     <AuthGuard>
@@ -103,7 +179,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Recent Activity */}
-              <div className="bg-zinc-900/40 border border-white/10 rounded-3xl p-8 backdrop-blur-md">
+              <div className="bg-zinc-900/40 border border-white/10 rounded-3xl p-8 backdrop-blur-md min-h-[300px] flex flex-col">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold text-white">Recent Downloads</h2>
                   <Link href="/templates" className="text-sm text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
@@ -111,33 +187,42 @@ export default function DashboardPage() {
                   </Link>
                 </div>
 
-                <div className="space-y-4">
-                  {/* Empty state or placeholders */}
-                  <div className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500" />
-                      <div>
-                        <h4 className="font-bold text-white">MERN Stack Pro</h4>
-                        <p className="text-xs text-gray-500">Downloaded 2 days ago</p>
-                      </div>
-                    </div>
-                    <button className="p-2 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors">
-                      <Download className="w-4 h-4" />
-                    </button>
+                {loading ? (
+                  <div className="flex-1 flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
                   </div>
-                  <div className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500" />
-                      <div>
-                        <h4 className="font-bold text-white">Spring Boot Portfolio</h4>
-                        <p className="text-xs text-gray-500">Downloaded 1 week ago</p>
+                ) : recentDownloads.length > 0 ? (
+                  <div className="space-y-4">
+                    {recentDownloads.map((item) => (
+                      <div key={item.id} className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-2xl hover:bg-white/[0.05] transition-colors group">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl border border-white/10 overflow-hidden bg-zinc-800">
+                             {item.templateImage ? (
+                               <img src={item.templateImage} alt="" className="w-full h-full object-cover" />
+                             ) : (
+                               <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600" />
+                             )}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-white group-hover:text-indigo-400 transition-colors">{item.templateTitle}</h4>
+                            <p className="text-xs text-gray-500">Downloaded {formatTimeAgo(item.downloadedAt)}</p>
+                          </div>
+                        </div>
+                        <Link 
+                          href={`/templates`}
+                          className="p-2 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+                        >
+                          <Download className="w-4 h-4" />
+                        </Link>
                       </div>
-                    </div>
-                    <button className="p-2 text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors">
-                      <Download className="w-4 h-4" />
-                    </button>
+                    ))}
                   </div>
-                </div>
+                ) : (
+                   <div className="flex-1 flex flex-col items-center justify-center text-center space-y-3 opacity-50">
+                     <Download className="w-10 h-10 text-gray-600" />
+                     <p className="text-sm text-gray-500 max-w-[200px]">No templates downloaded yet. Start building today!</p>
+                   </div>
+                )}
               </div>
             </div>
 
@@ -153,7 +238,9 @@ export default function DashboardPage() {
                   <span className="text-xs font-bold text-purple-400 bg-purple-500/10 px-3 py-1.5 rounded-full border border-purple-500/20">All time</span>
                 </div>
                 <h3 className="text-lg text-gray-400 font-medium">Total Downloads</h3>
-                <p className="text-6xl font-black text-white mt-2 tracking-tight">5</p>
+                <p className="text-6xl font-black text-white mt-2 tracking-tight">
+                  {loading ? '...' : totalDownloads.toLocaleString()}
+                </p>
               </div>
               {!isPremium && (
                 <div className="bg-gradient-to-b from-indigo-600 to-purple-900 border border-indigo-400/30 rounded-3xl p-8 relative overflow-hidden group">

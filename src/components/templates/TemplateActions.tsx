@@ -32,6 +32,39 @@ export default function TemplateActions({ template }: TemplateActionsProps) {
   const isFreeTemplate = (template.accessLevel || 'free').toLowerCase() === 'free';
   const hasPremiumAccess = isPremiumUser || ['admin', 'administrator', 'superadmin'].includes(role);
 
+  // Aggressive GitHub ZIP URL Resolver
+  const resolveZipUrl = (url?: string) => {
+    if (!url) return null;
+    const clean = url.trim().split('?')[0];
+    
+    // If it's already a direct zip or archive link, return as is
+    if (clean.toLowerCase().endsWith('.zip') || clean.includes('/archive/') || clean.includes('/zipball/')) {
+       return clean;
+    }
+
+    // Capture GitHub Owner/Repo
+    if (clean.includes('github.com')) {
+      try {
+        const parts = clean.replace(/\.git$/, '').replace(/\/$/, '').split('/');
+        const ghIdx = parts.findIndex(p => p.includes('github.com'));
+        if (ghIdx !== -1 && parts[ghIdx + 1] && parts[ghIdx + 2]) {
+          const owner = parts[ghIdx + 1];
+          const repo = parts[ghIdx + 2];
+          // zipball/HEAD is the most reliable redirect for ANY branch
+          return `https://github.com/${owner}/${repo}/zipball/HEAD`;
+        }
+      } catch (e) {}
+    }
+    return clean;
+  };
+
+  // Resolve from multiple possible fields
+  const downloadUrl = resolveZipUrl(template.zipUrl) || 
+                      resolveZipUrl(template.gitRepo) || 
+                      resolveZipUrl((template as any).githubUrl);
+
+  const canDownloadDirectly = isLoggedIn && (isFreeTemplate || hasPremiumAccess) && !!downloadUrl;
+
   const handleAction = async (actionType: 'download' | 'git') => {
     if (!isLoggedIn) {
       setShowLoginModal(true);
@@ -43,29 +76,24 @@ export default function TemplateActions({ template }: TemplateActionsProps) {
       return;
     }
 
-    // Performance action logic continues...
-
     // Perform action
     if (actionType === 'download') {
-      try {
-        await trackTemplateDownload(
-          user.uid,
+      if (downloadUrl) {
+        toast.success(`Starting download...`);
+        // Native fallback for edge cases
+        window.location.href = downloadUrl;
+        
+        trackTemplateDownload(
+          user!.uid,
           template.id,
           template.title,
           template.thumbnails?.[0] || template.images?.[0] || ''
-        );
-      } catch {
-        // Avoid blocking download when analytics write fails.
-      }
-      const downloadUrl = (template as any).zipUrl || template.liveLink;
-      if (downloadUrl) {
-        window.open(downloadUrl, '_blank');
-        toast.success(`Started download for ${template.title}`);
+        ).catch(() => {});
       } else {
-        toast.error('Download link not available yet.');
+        toast.error('Download link not available yet. Please try "Git Repository Access" instead.');
       }
-    } else if (actionType === 'git' && template.gitRepo) {
-      window.open(template.gitRepo, '_blank');
+    } else if (actionType === 'git' && (template.gitRepo || (template as any).githubUrl)) {
+      window.open(template.gitRepo || (template as any).githubUrl, '_blank');
     }
   };
 
@@ -104,15 +132,36 @@ export default function TemplateActions({ template }: TemplateActionsProps) {
         </motion.button>
 
         {/* Zip-File Download */}
-        <motion.button
-          whileHover={{ scale: 1.02, y: -2 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => handleAction('download')}
-          className="w-full flex items-center justify-center gap-3 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-400 font-bold py-4 px-8 rounded-2xl transition-all duration-300 shadow-lg shadow-emerald-500/5 group"
-        >
-          <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
-          Zip-File Download
-        </motion.button>
+        {canDownloadDirectly ? (
+          <motion.a
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            href={downloadUrl!}
+            onClick={() => {
+              toast.success(`Starting download...`);
+              trackTemplateDownload(
+                user!.uid,
+                template.id,
+                template.title,
+                template.thumbnails?.[0] || template.images?.[0] || ''
+              ).catch(() => {});
+            }}
+            className="w-full flex items-center justify-center gap-3 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-400 font-bold py-4 px-8 rounded-2xl transition-all duration-300 shadow-lg shadow-emerald-500/5 group text-center"
+          >
+            <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
+            Zip-File Download
+          </motion.a>
+        ) : (
+          <motion.button
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => handleAction('download')}
+            className="w-full flex items-center justify-center gap-3 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-400 font-bold py-4 px-8 rounded-2xl transition-all duration-300 shadow-lg shadow-emerald-500/5 group"
+          >
+            <Download className="w-5 h-5 group-hover:translate-y-0.5 transition-transform" />
+            Zip-File Download
+          </motion.button>
+        )}
       </div>
 
       {/* Modals */}

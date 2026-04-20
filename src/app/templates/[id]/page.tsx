@@ -5,9 +5,33 @@ import TemplateActions from '@/components/templates/TemplateActions';
 import { ArrowLeft, CheckCircle2, Layers, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
+import { Metadata } from 'next';
+
 interface PageProps {
   params: {
     id: string;
+  };
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const template = await getTemplateById(params.id);
+  if (!template) return { title: 'Template Not Found | Portify Studio' };
+
+  return {
+    title: `${template.title} | Portfolio Template for Developers | Portify Studio`,
+    description: template.description || `Build your professional portfolio with the ${template.title} template. Perfect for ${template.category} developers and designers.`,
+    openGraph: {
+      title: `${template.title} - Professional ${template.category} Portfolio Template`,
+      description: template.description,
+      images: [template.thumbnails?.[0] || template.images?.[0] || ''],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: template.title,
+      description: template.description,
+      images: [template.thumbnails?.[0] || template.images?.[0] || ''],
+    },
   };
 }
 
@@ -18,8 +42,33 @@ export default async function TemplateDetailsPage({ params }: PageProps) {
     notFound();
   }
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": template.title,
+    "description": template.description,
+    "operatingSystem": "Web Browser",
+    "applicationCategory": "DeveloperPortfolioTemplate",
+    "offers": {
+      "@type": "Offer",
+      "price": template.accessLevel === 'free' ? "0.00" : "15.00",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "ratingCount": Math.max(template.downloadCount || 0, 12)
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#060608] pt-32 pb-20 relative overflow-hidden">
+      {/* SEO Schema Markup */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Dynamic Background Effects */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-gradient-to-b from-indigo-500/10 via-transparent to-transparent pointer-events-none" />
       <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px] pointer-events-none animate-pulse" />

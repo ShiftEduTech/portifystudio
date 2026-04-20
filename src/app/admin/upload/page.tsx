@@ -140,8 +140,8 @@ export default function AdminUpload() {
     
     const totalImages = existingImages.length + validImageUrls.length;
     
-    if (!form.title || !form.description || !form.category || !form.techStack || !form.githubUrl || !form.liveUrl || !zipUrl || totalImages < 1) {
-      toast.error('Please fill all required fields and add at least 1 screenshot URL + zip URL.');
+    if (!form.title || !form.description || !form.category || !form.techStack || !form.githubUrl || !form.liveUrl || totalImages < 1) {
+      toast.error('Please fill all required fields and add at least 1 screenshot URL.');
       return;
     }
 
@@ -168,6 +168,22 @@ export default function AdminUpload() {
       // 3. Firestore update
       toast.loading('Saving template data...', { id: 'upload-status' });
       
+      // Auto-generate Zip URL from GitHub URL if empty
+      let finalZipUrl = zipUrl.trim();
+      if (!finalZipUrl && form.githubUrl) {
+        try {
+          let clean = form.githubUrl.trim().split('?')[0].replace(/\.git$/, '').replace(/\/$/, '');
+          const urlObj = new URL(clean.startsWith('http') ? clean : `https://${clean}`);
+          const parts = urlObj.pathname.split('/').filter(Boolean);
+          if (parts.length >= 2) {
+            // Using zipball/HEAD as it is the most reliable redirect for the default branch
+            finalZipUrl = `https://github.com/${parts[0]}/${parts[1]}/zipball/HEAD`;
+          }
+        } catch (e) {
+          console.error('Failed to auto-generate Zip URL:', e);
+        }
+      }
+
       const templateData = {
         title: form.title.trim(),
         titleLowercase: form.title.trim().toLowerCase(),
@@ -179,7 +195,7 @@ export default function AdminUpload() {
         githubUrl: form.githubUrl.trim(),
         liveUrl: form.liveUrl.trim(),
         images: finalImageUrls,
-        zipUrl: zipUrl.trim(),
+        zipUrl: finalZipUrl,
         updatedAt: serverTimestamp(),
       };
 
@@ -444,8 +460,9 @@ export default function AdminUpload() {
              Source Payload
           </h3>
           <div className="space-y-4">
-            <div className="text-xs text-gray-500 dark:text-gray-500 font-medium">
-              Provide the direct download URL for the project source code (.zip)
+            <div className="text-xs text-gray-500 dark:text-gray-500 font-medium leading-relaxed">
+              Provide the direct download URL for the project source code (.zip). <br/>
+              <span className="text-indigo-400/80 font-bold">Pro Tip:</span> If left empty, we will automatically generate a download link from your GitHub URL.
             </div>
             <div className="relative">
               <FileCode className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -453,9 +470,8 @@ export default function AdminUpload() {
                 type="url"
                 value={zipUrl}
                 onChange={(e) => setZipUrl(e.target.value)}
-                placeholder="https://.../source.zip"
+                placeholder="https://.../source.zip (Optional)"
                 className={inputClass + " pl-11 pr-10"}
-                required
               />
               {zipUrl && (
                 <button
@@ -467,12 +483,17 @@ export default function AdminUpload() {
                 </button>
               )}
             </div>
-            {zipUrl && (
+            {zipUrl ? (
               <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-bold text-emerald-400">Source URL provided</span>
+                <span className="text-xs font-bold text-emerald-400">Custom Source URL provided</span>
               </div>
-            )}
+            ) : form.githubUrl ? (
+              <div className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
+                <Globe className="w-4 h-4 text-indigo-400" />
+                <span className="text-xs font-bold text-indigo-400">Will auto-generate from GitHub URL</span>
+              </div>
+            ) : null}
           </div>
         </div>
 

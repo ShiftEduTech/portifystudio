@@ -8,7 +8,7 @@ import { Upload, Link2, FileCode, X, CheckCircle2, Loader2, ArrowLeft, Zap, Glob
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
-const CATEGORIES = ['MERN', 'Java', 'Python', 'DevOps', 'Next.js', 'AWS', 'React', 'Angular', 'Vue', 'Django'];
+const CATEGORIES = ['MERN', 'Java', 'Python', 'DevOps', 'Next.js', 'AWS', 'React', 'Cybersecurity', 'Angular', 'Network Engineer'];
 const TEMPLATE_TIERS = ['free', 'premium', 'pro'] as const;
 
 interface FormState {
@@ -32,12 +32,12 @@ export default function AdminUpload() {
     techStack: '',
     githubUrl: '', liveUrl: '',
   });
-  
+
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>(['', '', '', '']);
   const [imageUrlErrors, setImageUrlErrors] = useState<boolean[]>([false, false, false, false]);
   const [zipUrl, setZipUrl] = useState<string>('');
-  
+
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -87,7 +87,7 @@ export default function AdminUpload() {
   // Removed onZipDrop as it is no longer used for file uploads.
 
   // Valid URL images (non-empty, no error)
-  const validImageUrls = useMemo(() => 
+  const validImageUrls = useMemo(() =>
     imageUrls.filter((url, i) => url.trim() !== '' && !imageUrlErrors[i]),
     [imageUrls, imageUrlErrors]
   );
@@ -130,16 +130,16 @@ export default function AdminUpload() {
 
   // Removed uploadFile helper as we are now fully URL-based.
 
-  const slugify = (text: string) => 
+  const slugify = (text: string) =>
     text.toLowerCase()
-        .replace(/[^\w ]+/g, '')
-        .replace(/ +/g, '-');
+      .replace(/[^\w ]+/g, '')
+      .replace(/ +/g, '-');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const totalImages = existingImages.length + validImageUrls.length;
-    
+
     if (!form.title || !form.description || !form.category || !form.techStack || !form.githubUrl || !form.liveUrl || totalImages < 1) {
       toast.error('Please fill all required fields and add at least 1 screenshot URL.');
       return;
@@ -157,7 +157,7 @@ export default function AdminUpload() {
 
     try {
       const finalImageUrls = [...existingImages, ...validImageUrls];
-      
+
       // Perfect Tech Stack logic: trim, unique, non-empty
       const techStackArray = Array.from(new Set(
         form.techStack.split(',')
@@ -167,7 +167,7 @@ export default function AdminUpload() {
 
       // 3. Firestore update
       toast.loading('Saving template data...', { id: 'upload-status' });
-      
+
       // Auto-generate Zip URL from GitHub URL if empty
       let finalZipUrl = zipUrl.trim();
       if (!finalZipUrl && form.githubUrl) {
@@ -257,7 +257,7 @@ export default function AdminUpload() {
           <p className="text-gray-500 dark:text-gray-500 mt-2 text-sm italic">&quot;One step closer to greatness.&quot;</p>
         </div>
         <div className="flex gap-4">
-          <button onClick={() => { setDone(false); if(editId) router.push('/admin/templates'); else reset(); }}
+          <button onClick={() => { setDone(false); if (editId) router.push('/admin/templates'); else reset(); }}
             className="px-8 py-3 rounded-2xl text-sm font-semibold text-white border border-white/10 hover:bg-white/[0.05] transition-all">
             {editId ? 'Back to Templates' : 'Upload Another'}
           </button>
@@ -295,7 +295,7 @@ export default function AdminUpload() {
           </div>
         </div>
         <div className="hidden md:block">
-           <Zap className="w-8 h-8 text-indigo-500/20" />
+          <Zap className="w-8 h-8 text-indigo-500/20" />
         </div>
       </div>
 
@@ -304,8 +304,8 @@ export default function AdminUpload() {
         <div className={cardClass + " relative overflow-hidden"}>
           <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl pointer-events-none" />
           <h3 className="text-gray-900 dark:text-white font-bold mb-8 flex items-center gap-3">
-             <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
-             Core Identity
+            <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+            Core Identity
           </h3>
           <div className="space-y-6">
             <div>
@@ -343,8 +343,8 @@ export default function AdminUpload() {
         {/* Connectivity */}
         <div className={cardClass}>
           <h3 className="text-gray-900 dark:text-white font-bold mb-8 flex items-center gap-3">
-             <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
-             Connectivity
+            <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+            Connectivity
           </h3>
           <div className="grid sm:grid-cols-2 gap-6">
             <div>
@@ -368,8 +368,8 @@ export default function AdminUpload() {
         <div className={cardClass}>
           <div className="mb-8">
             <h3 className="text-gray-900 dark:text-white font-bold flex items-center gap-3">
-               <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
-               Visual Assets
+              <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+              Visual Assets
             </h3>
           </div>
 
@@ -455,13 +455,13 @@ export default function AdminUpload() {
 
         {/* Source Payload */}
         <div className={cardClass}>
-           <h3 className="text-gray-900 dark:text-white font-bold mb-8 flex items-center gap-3">
-             <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
-             Source Payload
+          <h3 className="text-gray-900 dark:text-white font-bold mb-8 flex items-center gap-3">
+            <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+            Source Payload
           </h3>
           <div className="space-y-4">
             <div className="text-xs text-gray-500 dark:text-gray-500 font-medium leading-relaxed">
-              Provide the direct download URL for the project source code (.zip). <br/>
+              Provide the direct download URL for the project source code (.zip). <br />
               <span className="text-indigo-400/80 font-bold">Pro Tip:</span> If left empty, we will automatically generate a download link from your GitHub URL.
             </div>
             <div className="relative">
@@ -504,7 +504,7 @@ export default function AdminUpload() {
               <span>{progress}%</span>
             </div>
             <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-               <div className="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-indigo-500 to-violet-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]" style={{ width: `${progress}%` }} />
+              <div className="h-full rounded-full transition-all duration-300 bg-gradient-to-r from-indigo-500 to-violet-500 shadow-[0_0_15px_rgba(99,102,241,0.5)]" style={{ width: `${progress}%` }} />
             </div>
           </div>
         )}

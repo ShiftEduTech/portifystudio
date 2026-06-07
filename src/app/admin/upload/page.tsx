@@ -8,7 +8,7 @@ import { Upload, Link2, FileCode, X, CheckCircle2, Loader2, ArrowLeft, Zap, Glob
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
-const CATEGORIES = ['MERN', 'Java', 'Python', 'DevOps', 'Next.js', 'AWS', 'React', 'Cybersecurity', 'Angular', 'Network Engineer'];
+const CATEGORIES = ['MERN', 'Java', 'Python', 'DevOps', 'Next.js', 'AWS', 'React', 'Cybersecurity', 'Angular', 'Data Analytics', 'Network Engineer'];
 const TEMPLATE_TIERS = ['free', 'premium', 'pro'] as const;
 
 interface FormState {
